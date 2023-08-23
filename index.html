@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset = 'utf-8'>
+	<title>Project Holodeck</title>
+	<style>
+		* {
+			margin: 0px;
+			padding: 0px;
+			box-sizing: border-box;
+		}
+		body {
+			/*cursor: none !important;*/
+			background-color: #000000;
+		}
+	</style>
+</head>
+<body>
+
+<!-- LOAD MODULES -->
+<script type = 'text/javascript' src = 'script/assetLoader.js'></script>
+<script type = 'text/javascript' src = 'script/loadScreen.js'></script>
+<script type = 'text/javascript' src = 'script/widgets.js'></script>
+
+<script>
+
+const t0 = Date.now();
+console.log('Loading...');
+
+// sysmod
+Date.prototype.stdTimezoneOffset = function () {
+    var jan = new Date(this.getFullYear(), 0, 1);
+    var jul = new Date(this.getFullYear(), 6, 1);
+    return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+}
+Date.prototype.dstObserved = function () { return this.getTimezoneOffset() < this.stdTimezoneOffset(); }
+
+// helpers
+function isEven (n) {return n % 2 == 0; }
+function randInt (min,max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function randomizeArray (a) {
+	let temp = [];
+	while (a.length > 0) temp.push(a.splice( randInt(0,a.length-1), 1)[0]);
+	for (let elem of temp) a.push(elem);
+}
+function hex2hsl(hex) {
+	// to rgb
+	let r = ('0x' + hex[1] + hex[2]) / 255;
+	let g = ('0x' + hex[3] + hex[4]) / 255;
+	let b = ('0x' + hex[5] + hex[6]) / 255;
+	let a = ('0x' + (hex[7] || 'f') + (hex[8] || 'f')) / 255;
+
+	// hsl prep
+	let cmin = Math.min(r,g,b), cmax = Math.max(r,g,b);
+	let delta = cmax - cmin;
+
+	// find h
+	let h = 0;
+	if (delta == 0) {
+		h = 0;
+	} else if (cmax == r) {
+		h = ((g - b) / delta) % 6;
+	} else if (cmax == g) {
+		h = (b - r) / delta + 2;
+	} else {
+		h = (r - g) / delta + 4;
+	}
+	h = Math.round(h*60);
+	if (h < 0) {h += 360;}
+	// find l
+	let l = (cmax + cmin) / 2;
+	// find s
+	let s = (delta == 0) ? 0 : (delta / (1 - Math.abs(2 * l - 1)));
+
+	// fin
+	let result = {};
+	result.h = h;
+	result.s = s;
+	result.l = l;
+	result.a = a;
+	result.colorString = 'hsla('+ h + ',' + (s*100).toFixed(1) + '%,' + (l*100).toFixed(1) + '%,' + a.toFixed(3) + ')';
+	return result;
+}
+function getColorizer(targetColor) {
+	let targetHue = hex2hsl(targetColor).h;
+	let sepiaHue = 60; // the sepia filter supposedly has a hue of 60 by default
+	return 'sepia(90%) saturate(250%) brightness(110%) hue-rotate(' + (targetHue - sepiaHue) + 'deg)';
+}
+
+// clock builders
+function getCssClockHands(diameter, settings) {
+	let o = {};
+	let container = document.createElement('div');
+	container.style.background = 'transparent';
+	container.style.position = 'absolute';
+	container.style.display = 'inline-block';
+	container.style.borderRadius = '50%';
+	container.style.width = diameter;
+	container.style.height = diameter;
+	o.container = container;
+	let sec = document.createElement('div');
+	sec.style.background = settings.color;
+	sec.style.position = 'absolute';
+	sec.style.display = 'inline-block';
+	sec.style.height = '40%';
+	sec.style.width = 'calc(0.25% + 1px)';
+	sec.style.left = '50%';
+	sec.style.top = '50%';
+	sec.style.transformOrigin = 'bottom';
+	sec.style.transform = 'translate(-50%, -100%)';
+	o.sec = sec;
+	container.appendChild(sec);
+	let min = document.createElement('div');
+	min.style.background = settings.color;
+	min.style.position = 'absolute';
+	min.style.display = 'inline-block';
+	min.style.height = '40%';
+	min.style.width = 'calc(0.5% + 1.5px)';
+	min.style.left = '50%';
+	min.style.top = '50%';
+	min.style.transformOrigin = 'bottom';
+	min.style.transform = 'translate(-50%, -100%)';
+	o.min = min;
+	container.appendChild(min);
+	let hour = document.createElement('div');
+	hour.style.background = settings.color;
+	hour.style.position = 'absolute';
+	hour.style.display = 'inline-block';
+	hour.style.height = '30%';
+	hour.style.width = 'calc(0.75% + 1.75px)';
+	hour.style.left = '50%';
+	hour.style.top = '50%';
+	hour.style.transformOrigin = 'bottom';
+	hour.style.transform = 'translate(-50%, -100%)';
+	o.hour = hour;
+	container.appendChild(hour);
+	let cap = document.createElement('div');
+	cap.style.background = settings.color;
+	cap.style.position = 'absolute';
+	cap.style.display = 'inline-block';
+	cap.style.borderRadius = '50%';
+	cap.style.width = '4%';
+	cap.style.height = '4%';
+	cap.style.left = '50%';
+	cap.style.top = '50%';
+	cap.style.transform = 'translate(-50%, -50%)';
+	o.cap = cap;
+	container.appendChild(cap);
+	return o;
+}
+function getSvgClockFrame(radius = 50, strokeWidth = 0.5, color = '#000000') {
+	let svgStr = '';
+	const dTheta = 2*Math.PI / 60;
+	const innerR = 2.65/3*radius;
+	const outerR = 2.95/3*radius;
+	for (let i = 0; i < 60; i++) {
+		const radiusOffset = (i % 5 == 0) ? innerR : outerR;
+		const lineWidth = (i % 5 == 0) ? (1.5*strokeWidth) : (strokeWidth);
+		const x1 = radius + outerR * Math.cos(i*dTheta);
+		const y1 = radius + outerR * Math.sin(i*dTheta);
+		const x2 = radius + radiusOffset * Math.cos(i*dTheta);
+		const y2 = radius + radiusOffset * Math.sin(i*dTheta);
+		svgStr += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"';
+		svgStr += ' style = "stroke: ' + color + '; stroke-width: ' + lineWidth + '; stroke-linecap: round;"';
+		svgStr += ' />';
+	}
+	return svgStr;
+}
+
+
+
+</script>
+
+</body>
+</html>
