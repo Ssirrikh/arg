@@ -16,11 +16,9 @@ class AssetLoader {
 	get numLoaded ()  { let n = 0; for (let asset in this.assets) n += (this.assets[asset].loaded) ? 1 : 0; return n; }
 	get numAssets () { return Object.keys(this.assets).length; }
 	get (path) {
-		const asset = (this.assets[path] && this.assets[path].loaded)
+		return (this.assets[path] && this.assets[path].loaded)
 			? this.assets[path].object
 			: undefined;
-		console.log(asset);
-		return asset;
 	}
 	add (path,type) {
 		const ext = path.split('.').slice(-1);
