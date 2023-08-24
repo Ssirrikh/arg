@@ -12,9 +12,9 @@ class AssetLoader {
 		this.queue = [];
 		this.assets = {};
 	}
-	get numLoading () { let n = 0; for (let asset of this.assets) n += (asset.loaded) ? 0 : 1; return n; }
-	get numLoaded () { return this.assets.getOwnPropertyNames().length; }
-	get numAssets () { return this.numLoading + this.numLoaded; }
+	get numLoading () { let n = 0; for (let asset in this.assets) n += (this.assets[asset].loaded) ? 0 : 1; return n; }
+	get numLoaded ()  { let n = 0; for (let asset in this.assets) n += (this.assets[asset].loaded) ? 1 : 0; return n; }
+	get numAssets () { return Object.keys(this.assets).length; }
 	get (path) {
 		const asset = (this.assets[path] && this.assets[path].loaded)
 			? this.assets[path].object
@@ -42,6 +42,7 @@ class AssetLoader {
 					this.assets[curr.path].object.onload = function () {
 						console.log('Loaded ' + self.root + '/' + curr.path);
 						self.assets[curr.path].loaded = true;
+						if (self.numLoading == 0) doOnLoad();
 					};
 					break;
 				case 'audio':
@@ -51,7 +52,6 @@ class AssetLoader {
 					console.warn('File type of ' + curr.path + ' cannot be loaded.');
 			}
 		}
-		doOnLoad();
 	}
 
 }
@@ -60,7 +60,7 @@ class AssetLoader {
 
 ////////////////////////////////////
 
-
+/*
 
 //// example usage ////
 
@@ -73,8 +73,10 @@ loader.add('song-art.jpg', 'image');
 loader.loadAll(() => {
 	let mapStub = loader.get('map-large2.png');
 	let musartStub = loader.get('song-art.jpg');
-	console.log(mapStub);
-	// document.body.appendChild(mapStub);
-	// document.body.appendChild(musartStub);
+	document.body.appendChild(mapStub);
+	document.body.appendChild(musartStub);
 });
+
+*/
+
 
