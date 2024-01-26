@@ -22,6 +22,8 @@ const DEFAULT_WIDGET_SETTINGS = Object.freeze({
 	appScaleV: 8
 });
 
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
 class WidgetController {
 	constructor (colors, gridUnit) {
 		this.settings = {};
@@ -29,12 +31,11 @@ class WidgetController {
 		this.widgets = [];
 	}
 	addWidget (gridX=0, gridY=0, widget) {
-		// do stuff
-		// no initial update, it's handled per-widget
+		// init handled per-widget
 	}
 	updateSettings () {
-		for (let widget of this.menu)       widget.updateSettings(this);
-		for (let widget of this.panelLeft)  widget.updateSettings(this);
+		for (let widget of this.menu)       widget.updateSettings(this.settings);
+		for (let widget of this.panelLeft)  widget.updateSettings(this.settings);
 	}
 	tick () {
 		for (let widget of this.menu)       widget.tick();
@@ -45,54 +46,127 @@ class WidgetController {
 ///////////////////////////////////////////
 
 class Bubble {
-	constructor (x, y, settings={}) {
+	constructor (x, y) {
 		this._x = x ?? 0;
 		this._y = y ?? 0;
-		this.settings = {
-			color: settings.color ?? DEFAULT_WIDGET_SETTINGS.color,
-			gridUnit: settings.gridUnit ?? DEFAULT_WIDGET_SETTINGS.gridUnit,
-			borderWidth : settings.borderRadius ?? DEFAULT_WIDGET_SETTINGS.borderRadius
-		};
 
-		// bubble border
-		this.border = document.createElement('div');
-		this.border.style.borderRadius = '50%';
-		c.appendChild(border);
-		// bubble container
 		this.domElement = document.createElement('div');
-		this.domElement.style.borderRadius = '50%';
-		this.domElement.style.overflow = 'hidden';
-		tc.appendChild(domElement);
+		this.domElement.classList.add('bubble');
+		document.body.appendChild(this.domElement);
 
 		// apply initial settings per-widget
 		this.setPos();
 		this.updateSettings();
 	}
+	get x () { return this._x; }
 	set x (x) { this.setPos(x,undefined); }
+	get y () { return this._y; }
 	set y (y) { this.setPos(undefined,y); }
 	setPos(x, y) {
-		this._x = parseFloat(x) ?? this._x ?? 0;
-		this._y = parseFloat(y) ?? this._y ?? 0;
-		this.border.style.left   = this.domElement.style.left   = Math.round(this._x - this.settings.gridUnit).toString() + 'px';
-		this.border.style.top    = this.domElement.style.top    = Math.round(this._y - this.settings.gridUnit).toString() + 'px';
+		this._x = x ?? this._x ?? 0;
+		this._y = y ?? this._y ?? 0;
+		this.domElement.style.left = this._x;
+		this.domElement.style.top  = this._y;
 	}
-	updateSettings (settings={}) {
-		this.settings = {
-			color:			settings.color ?? this.settings.color ?? DEFAULT_WIDGET_SETTINGS.color,
-			gridUnit:		settings.gridUnit ?? this.settings.gridUnit ?? DEFAULT_WIDGET_SETTINGS.gridUnit,
-			borderWidth :	settings.borderRadius ?? this.settings.borderRadius ?? DEFAULT_WIDGET_SETTINGS.borderRadius
-		};
-		// color
-		this.bubble.style.border = this.settings.borderWidth.toString() + 'px solid ' + this.settings.color;
-		// grid unit
-		this.border.style.width  = this.domElement.style.width  = Math.round(2*this.settings.gridUnit).toString() + 'px';
-		this.border.style.height = this.domElement.style.height = Math.round(2*this.settings.gridUnit).toString() + 'px';
-		this.border.style.left   = this.domElement.style.left   = Math.round(this._x - this.settings.gridUnit).toString() + 'px';
-		this.border.style.top    = this.domElement.style.top    = Math.round(this._y - this.settings.gridUnit).toString() + 'px';
+	updateSettings (settings={}) {}
+	tick () {}
+}
+
+class BubbleClockDigital extends Bubble {
+	constructor (x, y) {
+		super(x,y);
+
+		this.timeText = document.createElement('div');
+		this.timeText.style.fontSize = 'calc(0.75 * var(--grid-unit))';
+		this.domElement.appendChild(this.timeText);
+
+		this.tick();
 	}
 	tick () {
-		// no-op
+		const d = new Date();
+		const HH = d.getHours().toString().padStart(2,'0');
+		const mm = d.getMinutes().toString().padStart(2,'0');
+		this.timeText.innerHTML = HH + ':' + mm;
 	}
 }
+class BubbleClockAnalogue extends Bubble {
+	constructor (x, y) {
+		super(x,y);
+
+		this.secondHand = document.createElement('div');
+		this.secondHand.classList.add('clock-hand');
+		// this.secondHand.style.width = '1px';
+		// this.secondHand.style.height = 'calc(0.75 * var(--grid-unit))';
+		this.domElement.appendChild(this.secondHand);
+
+		this.minuteHand = document.createElement('div');
+		this.minuteHand.classList.add('clock-hand');
+		this.minuteHand.style.width = '1.5px';
+		// this.minuteHand.style.height = 'calc(0.75 * var(--grid-unit))';
+		this.domElement.appendChild(this.minuteHand);
+
+		this.hourHand = document.createElement('div');
+		this.hourHand.classList.add('clock-hand');
+		this.hourHand.style.width = '2.5px';
+		this.hourHand.style.height = 'calc(0.5 * var(--grid-unit))';
+		this.domElement.appendChild(this.hourHand);
+
+		this.tick();
+	}
+	tick () {
+		const d = new Date();
+		const thetaSeconds = 2*Math.PI * (d.getSeconds() / 60);
+		const thetaMinutes = 2*Math.PI * (d.getMinutes() / 60);
+		const thetaHours   = 2*Math.PI * ((d.getHours()%12) / 12);
+		this.secondHand.style.transform = 'translate(-50%,-100%) rotate(' + thetaSeconds + 'rad)';
+		this.minuteHand.style.transform = 'translate(-50%,-100%) rotate(' + thetaMinutes + 'rad)';
+		this.hourHand.style.transform = 'translate(-50%,-100%) rotate(' + thetaHours + 'rad)';
+	}
+}
+class BubbleCalendar extends Bubble {
+	constructor (x, y) {
+		super(x,y);
+
+		this.monthText = document.createElement('div');
+		this.monthText.style.top = '25%';
+		this.monthText.style.fontSize = 'calc(0.5 * var(--grid-unit))';
+		this.domElement.appendChild(this.monthText);
+
+		this.dayText = document.createElement('div');
+		this.dayText.style.top = '60%';
+		this.dayText.style.fontSize = 'calc(1.0 * var(--grid-unit))';
+		this.domElement.appendChild(this.dayText);
+
+		this.tick();
+	}
+	tick () {
+		const d = new Date();
+		this.dayText.innerHTML = d.getDate();
+		this.monthText.innerHTML = MONTHS_SHORT[d.getMonth()];
+	}
+}
+class BubbleMusicPlayer extends Bubble {
+	constructor (x, y) {
+		super(x,y);
+
+		this.icon = document.createElement('div');
+		this.icon.innerHTML = '<div class="icon-play"></div>';
+		this.domElement.appendChild(this.icon);
+
+		this.tick();
+	}
+	tick () {
+		// this.icon.innerHTML = '<div class="icon-play"></div>';
+	}
+}
+class BubbleMusicPlayerDummy extends BubbleMusicPlayer {
+	constructor (x,y) {
+		super(x,y);
+		this.icon.innerHTML = '<div class="icon-pause"></div>';
+	}
+}
+
+/////////////////////////////////////////////
+
 
 

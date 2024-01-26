@@ -3,29 +3,14 @@
 <head>
 	<meta charset = 'utf-8'>
 	<title>Project Holodeck</title>
-	<style>
-		* {
-			margin: 0px;
-			padding: 0px;
-			box-sizing: border-box;
-		}
-		body {
-			/*cursor: none !important;*/
-			background-color: #000000;
-		}
-		div {
-			background: transparent;
-			position: fixed;
-			display: inline-block;
-		}
-	</style>
+	<link rel='stylesheet' href='css/style.css'>
 </head>
 <body>
 
 <!-- LOAD MODULES -->
 <script type = 'text/javascript' src = 'script/asset-loader.js'></script>
 <script type = 'text/javascript' src = 'script/loading-screen.js'></script>
-<!-- <script type = 'text/javascript' src = 'script/widgets.js'></script> -->
+<script type = 'text/javascript' src = 'script/widgets.js'></script>
 
 <script>
 
@@ -172,6 +157,28 @@ function getSvgClockFrame(radius = 50, strokeWidth = 0.5, color = '#000000') {
 	return svgStr;
 }
 
+/////////////////////////////////
+
+let row0 = [
+	new BubbleClockDigital('4vw','4vw'),
+	new BubbleClockAnalogue('10vw','4vw'),
+	new BubbleCalendar('16vw','4vw'),
+	new BubbleMusicPlayer('22vw','4vw'), // defaults to play icon
+	new BubbleMusicPlayerDummy('28vw','4vw') // frozen pause icon for demo
+];
+// let clockDigital = new BubbleClockDigital('4vw','4vw');
+// let clockAnalogue = new BubbleClockAnalogue('10vw','4vw');
+
+function tick() {
+	requestAnimationFrame(tick);
+
+	for (let widget of row0) {
+		widget.tick();
+	}
+	// clockDigital.tick();
+	// clockAnalogue.tick();
+}
+tick();
 
 
 </script>

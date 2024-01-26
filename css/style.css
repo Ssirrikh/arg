@@ -1,0 +1,78 @@
+
+:root {
+    --line-color-blue: #88f7fc;
+    --glow-color-blue: #00ffff;
+
+    --line-color-orange: #fca558;
+    --glow-color-orange: #f07d18;
+
+    --line-color-green: #abff8a;
+    --glow-color-green: #00ff20;
+
+    --grid-unit: 2vw;
+}
+
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto';
+}
+
+body {
+    background-color: #000000;
+}
+
+div {
+    background-color: transparent;
+    display: inline-block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+
+
+.bubble {
+    color: var(--line-color-orange);
+    background-color: transparent;
+    border: 2px solid var(--line-color-orange);
+    border-radius: 50%;
+    filter: drop-shadow(0 0 2px var(--glow-color-orange));
+
+    display: inline-block;
+    position: absolute;
+    overflow: hidden;
+    width: calc(2 * var(--grid-unit));
+    height: calc(2 * var(--grid-unit));
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+}
+
+
+.clock-hand {
+    background-color: var(--line-color-orange);
+    width: 1px;
+    height: calc(0.75 * var(--grid-unit));
+    transform-origin: 50% 100%;
+    transform: translate(-50%,-100%) rotate(0rad);
+}
+.icon-play {
+    border-top: calc(0.4 * var(--grid-unit)) solid transparent;
+    border-bottom: calc(0.4 * var(--grid-unit)) solid transparent;
+    border-left: calc(0.4 * 1.732 * var(--grid-unit)) solid var(--line-color-orange); /* times sqrt(3) for equilateral triangle */
+    width: 0;
+    height: 0;
+    left: calc(50% + 0.1 * var(--grid-unit)); /* manually center since 0x0 div doesn't count borders */
+    /* left: calc(50% + 0.25 / 1.732 * var(--grid-unit)); /* this is mathematically accurate, but doesn't look as good imo */
+}
+.icon-pause {
+    border-left: calc(0.15 * var(--grid-unit)) solid var(--line-color-orange);
+    border-right: calc(0.15 * var(--grid-unit)) solid var(--line-color-orange);
+    width: calc(0.6 * var(--grid-unit));
+    height: calc(0.75 * var(--grid-unit));
+}
