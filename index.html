@@ -156,18 +156,48 @@ function getSvgClockFrame(radius = 50, strokeWidth = 0.5, color = '#000000') {
 	}
 	return svgStr;
 }
+const svgHeartPath = 'M 0 -4 C 0 -4 -3 -8 -6 -5 C -9 -2 -5 5 0 7 C 5 5 9 -2 6 -5 C 3 -8 0 -4 0 -4';
+function getSvgHeart (color='#ff0000') {
+	const w = getCSSVar('--grid-unit');
+	return (
+		'<svg width="'+w+'" height="'+w+'" viewbox="0 0 15 14">' +
+			'<g fill="'+color+'" transform="translate(8 7)">' +
+				'<path d="' + svgHeartPath + '"/>' +
+			'</g>' +
+		'</svg>'
+	);
+}
+// function getHeart () {
+// 	let e = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+// 	e.innerHTML = '';
+// 	return e;
+// }
 
 /////////////////////////////////
 
+const CSS_ROOT = document.querySelector(':root');
+const getCSSVar = p => getComputedStyle(CSS_ROOT).getPropertyValue(p);
+const setCSSVar = (p,v) => CSS_ROOT.style.setProperty(p,v);
+
+const GRID_UNIT = parseFloat(getCSSVar('--grid-unit'));
+const gridPos = (x,y) => [(2*GRID_UNIT + 3*x*GRID_UNIT)+'vw', (2*GRID_UNIT + 3*y*GRID_UNIT)+'vw'];
+
 let row0 = [
-	new BubbleClockDigital('4vw','4vw'),
-	new BubbleClockAnalogue('10vw','4vw'),
-	new BubbleCalendar('16vw','4vw'),
-	new BubbleMusicPlayer('22vw','4vw'), // defaults to play icon
-	new BubbleMusicPlayerDummy('28vw','4vw') // frozen pause icon for demo
+	new BubbleClockDigital(...gridPos(0,0)),
+	new BubbleClockAnalogue(...gridPos(1,0)),
+	new BubbleCalendar(...gridPos(2,0)),
+	new BubbleMusicPlayer(...gridPos(3,0)), // defaults to play icon
+	new BubbleMusicPlayerDummy(...gridPos(4,0)), // frozen pause icon for demo
+	new BubbleWeather(...gridPos(5,0)),
+	// https://stackoverflow.com/questions/17386168/how-to-create-a-heart-shape-using-css
+	new BubbleHeartrate(...gridPos(6,0)),
+	new BubbleCompass(...gridPos(7,0))
 ];
 // let clockDigital = new BubbleClockDigital('4vw','4vw');
 // let clockAnalogue = new BubbleClockAnalogue('10vw','4vw');
+let heart = document.createElement('div');
+heart.innerHTML = getHeart();
+document.body.appendChild(heart);
 
 function tick() {
 	requestAnimationFrame(tick);

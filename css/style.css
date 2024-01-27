@@ -9,7 +9,7 @@
     --line-color-green: #abff8a;
     --glow-color-green: #00ff20;
 
-    --grid-unit: 2vw;
+    --grid-unit: 1.75vw;
 }
 
 
@@ -18,7 +18,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Roboto';
+    font-family: 'Consolas';
 }
 
 body {
@@ -27,6 +27,14 @@ body {
 
 div {
     background-color: transparent;
+    display: inline-block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    text-align: center;
+}
+svg {
     display: inline-block;
     position: absolute;
     top: 50%;

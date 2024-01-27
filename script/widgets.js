@@ -77,7 +77,7 @@ class BubbleClockDigital extends Bubble {
 		super(x,y);
 
 		this.timeText = document.createElement('div');
-		this.timeText.style.fontSize = 'calc(0.75 * var(--grid-unit))';
+		this.timeText.style.fontSize = 'calc(0.65 * var(--grid-unit))';
 		this.domElement.appendChild(this.timeText);
 
 		this.tick();
@@ -163,6 +163,83 @@ class BubbleMusicPlayerDummy extends BubbleMusicPlayer {
 	constructor (x,y) {
 		super(x,y);
 		this.icon.innerHTML = '<div class="icon-pause"></div>';
+	}
+}
+class BubbleWeather extends Bubble {
+	constructor (x, y) {
+		super(x,y);
+
+		this.temperatureText = document.createElement('div');
+		this.temperatureText.style.fontSize = 'calc(0.85 * var(--grid-unit))';
+		this.temperatureText.style.left = 'calc(50% + 0.15 * var(--grid-unit))';
+		this.domElement.appendChild(this.temperatureText);
+
+		this.tick();
+	}
+	tick () {
+		const dummyUnits = {
+			f : '<sup>F</sup>',
+			c : '<sup>C</sup>',
+			deg : '°'
+		};
+		const dummyTemperature = 59;
+		this.temperatureText.innerHTML = dummyTemperature + dummyUnits['deg'];
+	}
+}
+class BubbleHeartrate extends Bubble {
+	constructor (x, y) {
+		super(x,y);
+
+		this.icon = document.createElement('div');
+		this.icon.innerHTML = getSvgHeart(getCSSVar('--line-color-orange'));
+		this.domElement.appendChild(this.icon);
+
+		this.tick();
+	}
+	tick () {}
+}
+class BubbleCompass extends Bubble {
+	constructor (x, y) {
+		super(x,y);
+
+		this.north = document.createElement('div');
+		this.north.innerHTML = '<b>N</b>';
+		this.north.style.fontSize = 'calc(0.5 * var(--grid-unit))';
+		this.north.style.transformOrigin = '50% 50%';
+		this.north.style.transform = 'translate(-50%,calc(-50% - 0.6 * var(--grid-unit)))';
+		this.domElement.appendChild(this.north);
+
+		this.south = document.createElement('div');
+		this.south.innerHTML = 'S';
+		this.south.style.fontSize = 'calc(0.4 * var(--grid-unit))';
+		this.south.style.transformOrigin = '50% 50%';
+		this.south.style.transform = 'translate(-50%,calc(-50% + 0.6 * var(--grid-unit)))';
+		this.domElement.appendChild(this.south);
+
+		this.east = document.createElement('div');
+		this.east.innerHTML = 'E';
+		this.east.style.fontSize = 'calc(0.4 * var(--grid-unit))';
+		this.east.style.transformOrigin = '50% 50%';
+		this.east.style.transform = 'translate(calc(-50% + 0.6 * var(--grid-unit)),-50%)';
+		this.domElement.appendChild(this.east);
+
+		this.west = document.createElement('div');
+		this.west.innerHTML = 'W';
+		this.west.style.fontSize = 'calc(0.4 * var(--grid-unit))';
+		this.west.style.transformOrigin = '50% 50%';
+		this.west.style.transform = 'translate(calc(-50% - 0.6 * var(--grid-unit)),-50%)';
+		this.domElement.appendChild(this.west);
+
+		this.tick();
+	}
+	tick () {
+		const AZIMUTH = 28;
+		const rotStr = 'rotate(-'+AZIMUTH+'deg)';
+		const unrotStr = 'rotate('+AZIMUTH+'deg)';
+		this.north.style.transform = 'translate(-50%,-50%) ' + rotStr + ' translate(0%,calc(0% - 0.6 * var(--grid-unit))) ' + unrotStr;
+		this.south.style.transform = 'translate(-50%,-50%) ' + rotStr + ' translate(0%,calc(0% + 0.6 * var(--grid-unit))) ' + unrotStr;
+		this.east.style.transform  = 'translate(-50%,-50%) ' + rotStr + ' translate(calc(0% + 0.6 * var(--grid-unit)),0%) ' + unrotStr;
+		this.west.style.transform  = 'translate(-50%,-50%) ' + rotStr + ' translate(calc(0% - 0.6 * var(--grid-unit)),0%) ' + unrotStr;
 	}
 }
 
