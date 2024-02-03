@@ -10,6 +10,10 @@
     --glow-color-green: #00ff20;
 
     --grid-unit: 1.75vw;
+    --bubble-width: calc(2 * var(--grid-unit));
+    --tab-width: calc(7 * var(--grid-unit));
+    --app-width: calc(17 * var(--grid-unit));
+    --border-radius: calc(0.5 * var(--grid-unit));
 }
 
 
@@ -54,11 +58,44 @@ svg {
     display: inline-block;
     position: absolute;
     overflow: hidden;
-    width: calc(2 * var(--grid-unit));
-    height: calc(2 * var(--grid-unit));
+    width: var(--bubble-width);
+    height: var(--bubble-width);
     top: 50%;
     left: 50%;
     transform: translate(-50%,-50%);
+}
+.tab {
+    color: var(--line-color-orange);
+    background-color: transparent;
+    border: 2px solid var(--line-color-orange);
+    border-right: transparent;
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+    filter: drop-shadow(0 0 2px var(--glow-color-orange));
+
+    display: inline-block;
+    position: absolute;
+    /* overflow: hidden; */
+    width: var(--tab-width);
+    height: var(--bubble-width);
+    top: 50%;
+    left: 50%;
+    transform: translate(-100%,-50%);
+}
+.app {
+    color: var(--line-color-orange);
+    background-color: transparent;
+    border: 2px solid var(--line-color-orange);
+    border-radius: var(--border-radius) var(--grid-unit) var(--border-radius) var(--border-radius);
+    filter: drop-shadow(0 0 2px var(--glow-color-orange));
+
+    display: inline-block;
+    position: absolute;
+    /* overflow: hidden; */
+    width: var(--app-width);
+    height: var(--tab-width);
+    top: 50%;
+    left: 50%;
+    transform: translate(calc(-100% + var(--grid-unit)),calc(0% - var(--grid-unit)));
 }
 
 

@@ -47,12 +47,12 @@ class WidgetController {
 
 class Bubble {
 	constructor (x, y) {
+		this._parent = document.body;
 		this._x = x ?? 0;
 		this._y = y ?? 0;
 
 		this.domElement = document.createElement('div');
 		this.domElement.classList.add('bubble');
-		document.body.appendChild(this.domElement);
 
 		// apply initial settings per-widget
 		this.setPos();
@@ -67,6 +67,87 @@ class Bubble {
 		this._y = y ?? this._y ?? 0;
 		this.domElement.style.left = this._x;
 		this.domElement.style.top  = this._y;
+	}
+	attach (parent) {
+		this._parent = parent ?? this._parent ?? document.body;
+		parent.appendChild(this.domElement);
+	}
+	detach () {
+		this._parent.removeChild(this.domElement);
+	}
+	updateSettings (settings={}) {}
+	tick () {}
+}
+class Tab {
+	constructor (x, y) {
+		this._parent = document.body;
+		this._x = x ?? 0;
+		this._y = y ?? 0;
+
+		this.domElement = document.createElement('div');
+		this.domElement.classList.add('tab');
+
+		this.bubble = new Bubble();
+
+		// apply initial settings per-widget
+		this.setPos();
+		this.updateSettings();
+	}
+	get x () { return this._x; }
+	set x (x) { this.setPos(x,undefined); }
+	get y () { return this._y; }
+	set y (y) { this.setPos(undefined,y); }
+	setPos(x, y) {
+		this._x = x ?? this._x ?? 0;
+		this._y = y ?? this._y ?? 0;
+		this.domElement.style.left = this.bubble.domElement.style.left = this._x;
+		this.domElement.style.top = this.bubble.domElement.style.top  = this._y;
+	}
+	attach (parent) {
+		this._parent = parent ?? this._parent ?? document.body;
+		parent.appendChild(this.domElement);
+		parent.appendChild(this.bubble.domElement);
+	}
+	detach () {
+		this._parent.removeChild(this.domElement);
+		this._parent.removeChild(this.bubble.domElement);
+	}
+	updateSettings (settings={}) {}
+	tick () {}
+}
+class App {
+	constructor (x, y) {
+		this._parent = document.body;
+		this._x = x ?? 0;
+		this._y = y ?? 0;
+
+		this.domElement = document.createElement('div');
+		this.domElement.classList.add('app');
+
+		this.bubble = new Bubble();
+
+		// apply initial settings per-widget
+		this.setPos();
+		this.updateSettings();
+	}
+	get x () { return this._x; }
+	set x (x) { this.setPos(x,undefined); }
+	get y () { return this._y; }
+	set y (y) { this.setPos(undefined,y); }
+	setPos(x, y) {
+		this._x = x ?? this._x ?? 0;
+		this._y = y ?? this._y ?? 0;
+		this.domElement.style.left = this.bubble.domElement.style.left = this._x;
+		this.domElement.style.top = this.bubble.domElement.style.top  = this._y;
+	}
+	attach (parent) {
+		this._parent = parent ?? this._parent ?? document.body;
+		parent.appendChild(this.domElement);
+		parent.appendChild(this.bubble.domElement);
+	}
+	detach () {
+		this._parent.removeChild(this.domElement);
+		this._parent.removeChild(this.bubble.domElement);
 	}
 	updateSettings (settings={}) {}
 	tick () {}

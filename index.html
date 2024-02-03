@@ -191,19 +191,42 @@ let row0 = [
 	new BubbleWeather(...gridPos(5,0)),
 	// https://stackoverflow.com/questions/17386168/how-to-create-a-heart-shape-using-css
 	new BubbleHeartrate(...gridPos(6,0)),
-	new BubbleCompass(...gridPos(7,0))
+	new BubbleCompass(...gridPos(7,0)),
+	new Tab(...gridPos(10,0))
 ];
-// let clockDigital = new BubbleClockDigital('4vw','4vw');
-// let clockAnalogue = new BubbleClockAnalogue('10vw','4vw');
+let row1 = [
+	new Tab(...gridPos(2,1)),
+	new Tab(...gridPos(5,1))
+];
+let row2 = [
+	new App(...gridPos(5,2))
+];
 
-function tick() {
+function init () {
+	for (let widget of row0) {
+		widget.attach(document.body);
+	}
+	for (let widget of row1) {
+		widget.attach(document.body);
+	}
+	for (let widget of row2) {
+		widget.attach(document.body);
+	}
+}
+init();
+
+function tick () {
 	requestAnimationFrame(tick);
 
 	for (let widget of row0) {
 		widget.tick();
 	}
-	// clockDigital.tick();
-	// clockAnalogue.tick();
+	for (let widget of row1) {
+		widget.tick();
+	}
+	for (let widget of row2) {
+		widget.tick();
+	}
 }
 tick();
 
