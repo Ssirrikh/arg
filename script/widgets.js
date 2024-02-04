@@ -22,6 +22,7 @@ const DEFAULT_WIDGET_SETTINGS = Object.freeze({
 	appScaleV: 8
 });
 
+const DAYS_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 class WidgetController {
@@ -78,80 +79,6 @@ class Bubble {
 	updateSettings (settings={}) {}
 	tick () {}
 }
-class Tab {
-	constructor (x, y) {
-		this._parent = document.body;
-		this._x = x ?? 0;
-		this._y = y ?? 0;
-
-		this.domElement = document.createElement('div');
-		this.domElement.classList.add('tab');
-
-		this.bubble = new Bubble();
-
-		// apply initial settings per-widget
-		this.setPos();
-		this.updateSettings();
-	}
-	get x () { return this._x; }
-	set x (x) { this.setPos(x,undefined); }
-	get y () { return this._y; }
-	set y (y) { this.setPos(undefined,y); }
-	setPos(x, y) {
-		this._x = x ?? this._x ?? 0;
-		this._y = y ?? this._y ?? 0;
-		this.domElement.style.left = this.bubble.domElement.style.left = this._x;
-		this.domElement.style.top = this.bubble.domElement.style.top  = this._y;
-	}
-	attach (parent) {
-		this._parent = parent ?? this._parent ?? document.body;
-		parent.appendChild(this.domElement);
-		parent.appendChild(this.bubble.domElement);
-	}
-	detach () {
-		this._parent.removeChild(this.domElement);
-		this._parent.removeChild(this.bubble.domElement);
-	}
-	updateSettings (settings={}) {}
-	tick () {}
-}
-class App {
-	constructor (x, y) {
-		this._parent = document.body;
-		this._x = x ?? 0;
-		this._y = y ?? 0;
-
-		this.domElement = document.createElement('div');
-		this.domElement.classList.add('app');
-
-		this.bubble = new Bubble();
-
-		// apply initial settings per-widget
-		this.setPos();
-		this.updateSettings();
-	}
-	get x () { return this._x; }
-	set x (x) { this.setPos(x,undefined); }
-	get y () { return this._y; }
-	set y (y) { this.setPos(undefined,y); }
-	setPos(x, y) {
-		this._x = x ?? this._x ?? 0;
-		this._y = y ?? this._y ?? 0;
-		this.domElement.style.left = this.bubble.domElement.style.left = this._x;
-		this.domElement.style.top = this.bubble.domElement.style.top  = this._y;
-	}
-	attach (parent) {
-		this._parent = parent ?? this._parent ?? document.body;
-		parent.appendChild(this.domElement);
-		parent.appendChild(this.bubble.domElement);
-	}
-	detach () {
-		this._parent.removeChild(this.domElement);
-		this._parent.removeChild(this.bubble.domElement);
-	}
-	updateSettings (settings={}) {}
-	tick () {}
-}
 
 class BubbleClockDigital extends Bubble {
 	constructor (x, y) {
@@ -202,6 +129,38 @@ class BubbleClockAnalogue extends Bubble {
 		this.secondHand.style.transform = 'translate(-50%,-100%) rotate(' + thetaSeconds + 'rad)';
 		this.minuteHand.style.transform = 'translate(-50%,-100%) rotate(' + thetaMinutes + 'rad)';
 		this.hourHand.style.transform = 'translate(-50%,-100%) rotate(' + thetaHours + 'rad)';
+	}
+}
+class BubbleClockFoundation extends Bubble {
+	constructor (x, y) {
+		super(x,y);
+
+		this.timeText = document.createElement('div');
+		this.timeText.style.fontSize = 'calc(0.8 * var(--grid-unit))';
+		this.domElement.appendChild(this.timeText);
+
+		this.secondsDot = document.createElement('div');
+		this.secondsDot.classList.add('circle-filled');
+		this.secondsDot.style.width = this.secondsDot.style.height = 'calc(0.15 * var(--grid-unit))';
+		this.secondsDot.style.transform = 'translate(-50%,-50%) rotate(0deg) translate(0,calc(-0.7 * var(--grid-unit)))';
+		this.domElement.appendChild(this.secondsDot);
+
+		this.minutesDot = document.createElement('div');
+		this.minutesDot.classList.add('circle');
+		this.minutesDot.style.width = this.minutesDot.style.height = 'calc(0.3 * var(--grid-unit))';
+		this.minutesDot.style.transform = 'translate(-50%,-50%) rotate(0deg) translate(0,calc(-0.7 * var(--grid-unit)))';
+		this.domElement.appendChild(this.minutesDot);
+
+		this.tick();
+	}
+	tick () {
+		const d = new Date();
+		const HH = d.getHours().toString().padStart(2,'0');
+		const thetaSeconds = 2*Math.PI * (d.getSeconds() / 60);
+		const thetaMinutes = 2*Math.PI * (d.getMinutes() / 60);
+		this.timeText.innerHTML = HH;
+		this.secondsDot.style.transform = 'translate(-50%,-50%) rotate('+thetaSeconds+'rad) translate(0,calc(-0.7 * var(--grid-unit)))';
+		this.minutesDot.style.transform = 'translate(-50%,-50%) rotate('+thetaMinutes+'rad) translate(0,calc(-0.7 * var(--grid-unit)))';
 	}
 }
 class BubbleCalendar extends Bubble {
@@ -323,6 +282,142 @@ class BubbleCompass extends Bubble {
 		this.west.style.transform  = 'translate(-50%,-50%) ' + rotStr + ' translate(calc(0% - 0.6 * var(--grid-unit)),0%) ' + unrotStr;
 	}
 }
+
+class Tab {
+	constructor (x, y) {
+		this._parent = document.body;
+		this._x = x ?? 0;
+		this._y = y ?? 0;
+
+		this.domElement = document.createElement('div');
+		this.domElement.classList.add('tab');
+
+		this.bubble = new Bubble();
+
+		// apply initial settings per-widget
+		this.setPos();
+		this.updateSettings();
+	}
+	get x () { return this._x; }
+	set x (x) { this.setPos(x,undefined); }
+	get y () { return this._y; }
+	set y (y) { this.setPos(undefined,y); }
+	setPos(x, y) {
+		this._x = x ?? this._x ?? 0;
+		this._y = y ?? this._y ?? 0;
+		this.domElement.style.left = this.bubble.domElement.style.left = this._x;
+		this.domElement.style.top = this.bubble.domElement.style.top  = this._y;
+	}
+	attach (parent) {
+		this._parent = parent ?? this._parent ?? document.body;
+		parent.appendChild(this.domElement);
+		parent.appendChild(this.bubble.domElement);
+	}
+	detach () {
+		this._parent.removeChild(this.domElement);
+		this._parent.removeChild(this.bubble.domElement);
+	}
+	updateSettings (settings={}) {}
+	tick () {}
+}
+
+class TabClock extends Tab {
+	constructor (x, y) {
+		super(x,y);
+
+		this.bubble = new BubbleClockFoundation();
+
+		this.timeText = document.createElement('div');
+		this.timeText.style.fontSize = 'calc(1.2 * var(--grid-unit))';
+		this.timeText.style.left = 'calc(50% - 0.25 * var(--grid-unit))';
+		this.domElement.appendChild(this.timeText);
+
+		this.setPos();
+		this.tick();
+	}
+	tick () {
+		const d = new Date();
+		const HH = d.getHours().toString().padStart(2,'0');
+		const mm = d.getMinutes().toString().padStart(2,'0');
+		this.timeText.innerHTML = HH + ':' + mm;
+		
+		this.bubble.tick();
+	}
+}
+class TabCalendar extends Tab {
+	constructor (x, y) {
+		super(x,y);
+
+		this.bubble = new BubbleCalendar();
+
+		this.dayText = document.createElement('div');
+		this.dayText.style.fontSize = 'calc(0.5 * var(--grid-unit))';
+		this.dayText.style.top = '25%';
+		this.dayText.style.left = '5%';
+		this.dayText.style.transform = 'translate(0,-50%)'; // left anchor
+		this.domElement.appendChild(this.dayText);
+
+		this.dateText = document.createElement('div');
+		this.dateText.style.fontSize = 'calc(0.9* var(--grid-unit))';
+		this.dateText.style.top = '65%';
+		this.dateText.style.left = '5%';
+		this.dateText.style.transform = 'translate(0,-50%)'; // left anchor
+		this.domElement.appendChild(this.dateText);
+
+		this.setPos();
+		this.tick();
+	}
+	tick () {
+		const d = new Date();
+		const EEEE = DAYS_LONG[ d.getDay() ];
+		const mm = (d.getMonth() + 1).toString().padStart(2,'0');
+		const dd = d.getDate().toString().padStart(2,'0');
+		const yyyy = d.getFullYear().toString();
+		this.dayText.innerHTML = EEEE;
+		this.dateText.innerHTML = mm + '/' + dd + '/' + yyyy;
+		
+		this.bubble.tick();
+	}
+}
+
+class App {
+	constructor (x, y) {
+		this._parent = document.body;
+		this._x = x ?? 0;
+		this._y = y ?? 0;
+
+		this.domElement = document.createElement('div');
+		this.domElement.classList.add('app');
+
+		this.bubble = new Bubble();
+
+		// apply initial settings per-widget
+		this.setPos();
+		this.updateSettings();
+	}
+	get x () { return this._x; }
+	set x (x) { this.setPos(x,undefined); }
+	get y () { return this._y; }
+	set y (y) { this.setPos(undefined,y); }
+	setPos(x, y) {
+		this._x = x ?? this._x ?? 0;
+		this._y = y ?? this._y ?? 0;
+		this.domElement.style.left = this.bubble.domElement.style.left = this._x;
+		this.domElement.style.top = this.bubble.domElement.style.top  = this._y;
+	}
+	attach (parent) {
+		this._parent = parent ?? this._parent ?? document.body;
+		parent.appendChild(this.domElement);
+		parent.appendChild(this.bubble.domElement);
+	}
+	detach () {
+		this._parent.removeChild(this.domElement);
+		this._parent.removeChild(this.bubble.domElement);
+	}
+	updateSettings (settings={}) {}
+	tick () {}
+}
+
 
 /////////////////////////////////////////////
 

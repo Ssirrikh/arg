@@ -99,6 +99,16 @@ svg {
 }
 
 
+.circle {
+    background-color: transparent;
+    border: 1px solid var(--line-color-orange);
+    border-radius: 50%;
+}
+.circle-filled {
+    background-color: var(--line-color-orange);
+    border: none;
+    border-radius: 50%;
+}
 .clock-hand {
     background-color: var(--line-color-orange);
     width: 1px;

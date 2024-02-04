@@ -185,18 +185,19 @@ const gridPos = (x,y) => [(2*GRID_UNIT + 3*x*GRID_UNIT)+'vw', (2*GRID_UNIT + 3*y
 let row0 = [
 	new BubbleClockDigital(...gridPos(0,0)),
 	new BubbleClockAnalogue(...gridPos(1,0)),
-	new BubbleCalendar(...gridPos(2,0)),
-	new BubbleMusicPlayer(...gridPos(3,0)), // defaults to play icon
-	new BubbleMusicPlayerDummy(...gridPos(4,0)), // frozen pause icon for demo
-	new BubbleWeather(...gridPos(5,0)),
+	new BubbleClockFoundation(...gridPos(2,0)),
+	new BubbleCalendar(...gridPos(3,0)),
+	new BubbleMusicPlayer(...gridPos(4,0)), // defaults to play icon
+	new BubbleMusicPlayerDummy(...gridPos(5,0)), // frozen pause icon for demo
+	new BubbleWeather(...gridPos(6,0)),
 	// https://stackoverflow.com/questions/17386168/how-to-create-a-heart-shape-using-css
-	new BubbleHeartrate(...gridPos(6,0)),
-	new BubbleCompass(...gridPos(7,0)),
-	new Tab(...gridPos(10,0))
+	new BubbleHeartrate(...gridPos(7,0)),
+	new BubbleCompass(...gridPos(8,0)),
+	new Tab(...gridPos(11,0))
 ];
 let row1 = [
-	new Tab(...gridPos(2,1)),
-	new Tab(...gridPos(5,1))
+	new TabClock(...gridPos(2,1)),
+	new TabCalendar(...gridPos(5,1))
 ];
 let row2 = [
 	new App(...gridPos(5,2))
