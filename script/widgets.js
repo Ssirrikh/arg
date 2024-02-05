@@ -25,6 +25,31 @@ const DEFAULT_WIDGET_SETTINGS = Object.freeze({
 const DAYS_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+const weatherStub = {
+	location : 'Los Angeles',
+	condition : 'Mostly Cloudy',
+	temperature : {
+		c : 15.0,
+		f : 59
+	},
+	hi : {
+		c : 17.8,
+		f : 64
+	},
+	lo : {
+		c : 8.3,
+		f : 47
+	}
+};
+
+let preferredUnits = {
+	time : '24',
+	temperature : 'f',
+	distance : 'm'
+};
+
+/////////////////////
+
 class WidgetController {
 	constructor (colors, gridUnit) {
 		this.settings = {};
@@ -222,8 +247,9 @@ class BubbleWeather extends Bubble {
 			c : '<sup>C</sup>',
 			deg : '°'
 		};
-		const dummyTemperature = 59;
-		this.temperatureText.innerHTML = dummyTemperature + dummyUnits['deg'];
+		const c = Math.round( weatherStub.temperature[preferredUnits.temperature] );
+		const u = dummyUnits['deg'];
+		this.temperatureText.innerHTML = c + u;
 	}
 }
 class BubbleHeartrate extends Bubble {
@@ -375,6 +401,45 @@ class TabCalendar extends Tab {
 		const yyyy = d.getFullYear().toString();
 		this.dayText.innerHTML = EEEE;
 		this.dateText.innerHTML = mm + '/' + dd + '/' + yyyy;
+		
+		this.bubble.tick();
+	}
+}
+class TabWeather extends Tab {
+	constructor (x, y) {
+		super(x,y);
+
+		this.bubble = new BubbleWeather();
+
+		this.locText = document.createElement('div');
+		this.locText.style.fontSize = 'calc(0.8 * var(--grid-unit))';
+		// this.locText.style.left = '45%'; // re-center if translate(-50%,x)
+		this.locText.style.top = '32%';
+		this.locText.style.left = '5%';
+		this.locText.style.transform = 'translate(0,-50%)'; // left anchor
+		this.domElement.appendChild(this.locText);
+
+		this.conditionText = document.createElement('div');
+		this.conditionText.style.fontSize = 'calc(0.45 * var(--grid-unit))';
+		this.conditionText.style.top = '75%';
+		this.conditionText.style.left = '6%';
+		this.conditionText.style.transform = 'translate(0,-50%)'; // left anchor
+		this.domElement.appendChild(this.conditionText);
+
+		this.hiloText = document.createElement('div');
+		this.hiloText.style.fontSize = 'calc(0.45 * var(--grid-unit))';
+		this.hiloText.style.top = '75%';
+		this.hiloText.style.left = '83%';
+		this.hiloText.style.transform = 'translate(-100%,-50%)'; // right anchor
+		this.domElement.appendChild(this.hiloText);
+
+		this.setPos();
+		this.tick();
+	}
+	tick () {
+		this.locText.innerHTML = weatherStub.location;
+		this.conditionText.innerHTML = weatherStub.condition;
+		this.hiloText.innerHTML = Math.round(weatherStub.hi[preferredUnits.temperature]) + '/' + Math.round(weatherStub.lo[preferredUnits.temperature]);
 		
 		this.bubble.tick();
 	}
