@@ -41,6 +41,15 @@ const weatherStub = {
 		f : 47
 	}
 };
+const audioStub = {
+	title : 'AHX Log 024',
+	paused : true,
+	duration : 72.0,
+	currentTime : 34.4,
+
+	currentTimeStr : () => timeStr(audioStub.currentTime),
+	durationStr : () => timeStr(audioStub.duration)
+};
 
 let preferredUnits = {
 	time : '24',
@@ -49,6 +58,14 @@ let preferredUnits = {
 };
 
 /////////////////////
+
+function timeStr (seconds = 0) {
+	let s = Math.floor(seconds % 60).toString().padStart(2,'0');
+	let m = Math.floor(seconds/60) % 60;
+	let M = (Math.floor(seconds/60) % 60).toString().padStart(2,'0');
+	let h = Math.floor(seconds/60/60);
+	return (h>0) ? (h+':'+M+':'+s) : (m+':'+s);
+}
 
 class WidgetController {
 	constructor (colors, gridUnit) {
@@ -210,7 +227,7 @@ class BubbleCalendar extends Bubble {
 		this.monthText.innerHTML = MONTHS_SHORT[d.getMonth()];
 	}
 }
-class BubbleMusicPlayer extends Bubble {
+class BubblePlayer extends Bubble {
 	constructor (x, y) {
 		super(x,y);
 
@@ -224,7 +241,7 @@ class BubbleMusicPlayer extends Bubble {
 		// this.icon.innerHTML = '<div class="icon-play"></div>';
 	}
 }
-class BubbleMusicPlayerDummy extends BubbleMusicPlayer {
+class BubblePlayerDummy extends BubblePlayer {
 	constructor (x,y) {
 		super(x,y);
 		this.icon.innerHTML = '<div class="icon-pause"></div>';
@@ -440,6 +457,61 @@ class TabWeather extends Tab {
 		this.locText.innerHTML = weatherStub.location;
 		this.conditionText.innerHTML = weatherStub.condition;
 		this.hiloText.innerHTML = Math.round(weatherStub.hi[preferredUnits.temperature]) + '/' + Math.round(weatherStub.lo[preferredUnits.temperature]);
+		
+		this.bubble.tick();
+	}
+}
+class TabPlayer extends Tab {
+	constructor (x, y) {
+		super(x,y);
+
+		this.bubble = new BubblePlayer();
+
+		this.titleText = document.createElement('div');
+		this.titleText.style.fontSize = 'calc(0.55 * var(--grid-unit))';
+		this.titleText.style.left = '45%'; // re-center if translate(-50%,x)
+		this.titleText.style.top = '32%';
+		this.domElement.appendChild(this.titleText);
+
+		this.progressBarBase = document.createElement('div');
+		this.progressBarBase.style.backgroundColor = 'var(--line-color-orange-transparent)';
+		this.progressBarBase.style.width = '78%';
+		this.progressBarBase.style.height = '3%';
+		this.progressBarBase.style.left = '5%';
+		this.progressBarBase.style.top = '65%';
+		this.progressBarBase.style.transform = 'translate(0,-50%)'; // left anchor
+		this.domElement.appendChild(this.progressBarBase);
+
+		this.progressBar = document.createElement('div');
+		this.progressBar.style.backgroundColor = 'var(--line-color-orange)';
+		this.progressBar.style.height = '3%';
+		this.progressBar.style.left = '5%';
+		this.progressBar.style.top = '65%';
+		this.progressBar.style.transform = 'translate(0,-50%)'; // left anchor
+		this.domElement.appendChild(this.progressBar);
+
+		this.currentTimeText = document.createElement('div');
+		this.currentTimeText.style.fontSize = 'calc(0.45 * var(--grid-unit))';
+		this.currentTimeText.style.left = '5%';
+		this.currentTimeText.style.top = '80%';
+		this.currentTimeText.style.transform = 'translate(0,-50%)'; // left anchor
+		this.domElement.appendChild(this.currentTimeText);
+
+		this.durationText = document.createElement('div');
+		this.durationText.style.fontSize = 'calc(0.45 * var(--grid-unit))';
+		this.durationText.style.left = '83%';
+		this.durationText.style.top = '80%';
+		this.durationText.style.transform = 'translate(-100%,-50%)'; // right anchor
+		this.domElement.appendChild(this.durationText);
+
+		this.setPos();
+		this.tick();
+	}
+	tick () {
+		this.titleText.innerHTML = audioStub.title;
+		this.progressBar.style.width = (78 * audioStub.currentTime/audioStub.duration) + '%';
+		this.currentTimeText.innerHTML = timeStr(audioStub.currentTime);
+		this.durationText.innerHTML = timeStr(audioStub.duration);
 		
 		this.bubble.tick();
 	}
