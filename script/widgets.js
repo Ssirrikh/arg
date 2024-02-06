@@ -25,8 +25,13 @@ const DEFAULT_WIDGET_SETTINGS = Object.freeze({
 const DAYS_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
+const gameLocStub = {
+	azi : 150.2
+};
 const weatherStub = {
 	location : 'Los Angeles',
+	lat : 34.067,
+	lon : -118.440,
 	condition : 'Mostly Cloudy',
 	temperature : {
 		c : 15.0,
@@ -65,6 +70,11 @@ function timeStr (seconds = 0) {
 	let M = (Math.floor(seconds/60) % 60).toString().padStart(2,'0');
 	let h = Math.floor(seconds/60/60);
 	return (h>0) ? (h+':'+M+':'+s) : (m+':'+s);
+}
+function latlonStr (coord = 0) {
+	let s = (coord < 0) ? '' : '+';
+	let c = coord.toFixed(3).padStart(7,'0');
+	return s + c;
 }
 
 class WidgetController {
@@ -142,6 +152,11 @@ class BubbleClockDigital extends Bubble {
 class BubbleClockAnalogue extends Bubble {
 	constructor (x, y) {
 		super(x,y);
+
+		this.center = document.createElement('div');
+		this.center.classList.add('circle-filled');
+		this.center.style.width = this.center.style.height = '7%';
+		this.domElement.appendChild(this.center);
 
 		this.secondHand = document.createElement('div');
 		this.secondHand.classList.add('clock-hand');
@@ -285,9 +300,15 @@ class BubbleCompass extends Bubble {
 	constructor (x, y) {
 		super(x,y);
 
+		this.center = document.createElement('div');
+		this.center.style.backgroundColor = 'var(--line-color-orange)';
+		this.center.style.width = this.center.style.height = '15%';
+		this.center.style.transform = 'translate(-50%,-50%) rotate(-45deg) skew(165deg,165deg)';
+		this.domElement.appendChild(this.center);
+
 		this.north = document.createElement('div');
-		this.north.innerHTML = '<b>N</b>';
-		this.north.style.fontSize = 'calc(0.5 * var(--grid-unit))';
+		this.north.innerHTML = 'N';
+		this.north.style.fontSize = 'calc(0.4 * var(--grid-unit))';
 		this.north.style.transformOrigin = '50% 50%';
 		this.north.style.transform = 'translate(-50%,calc(-50% - 0.6 * var(--grid-unit)))';
 		this.domElement.appendChild(this.north);
@@ -316,9 +337,8 @@ class BubbleCompass extends Bubble {
 		this.tick();
 	}
 	tick () {
-		const AZIMUTH = 28;
-		const rotStr = 'rotate(-'+AZIMUTH+'deg)';
-		const unrotStr = 'rotate('+AZIMUTH+'deg)';
+		const rotStr = 'rotate(-'+gameLocStub.azi+'deg)';
+		const unrotStr = 'rotate('+gameLocStub.azi+'deg)';
 		this.north.style.transform = 'translate(-50%,-50%) ' + rotStr + ' translate(0%,calc(0% - 0.6 * var(--grid-unit))) ' + unrotStr;
 		this.south.style.transform = 'translate(-50%,-50%) ' + rotStr + ' translate(0%,calc(0% + 0.6 * var(--grid-unit))) ' + unrotStr;
 		this.east.style.transform  = 'translate(-50%,-50%) ' + rotStr + ' translate(calc(0% + 0.6 * var(--grid-unit)),0%) ' + unrotStr;
@@ -512,6 +532,43 @@ class TabPlayer extends Tab {
 		this.progressBar.style.width = (78 * audioStub.currentTime/audioStub.duration) + '%';
 		this.currentTimeText.innerHTML = timeStr(audioStub.currentTime);
 		this.durationText.innerHTML = timeStr(audioStub.duration);
+		
+		this.bubble.tick();
+	}
+}
+class TabCompass extends Tab {
+	constructor (x, y) {
+		super(x,y);
+
+		this.bubble = new BubbleCompass();
+
+		this.latText = document.createElement('div');
+		this.latText.style.fontSize = 'calc(0.5 * var(--grid-unit))';
+		this.latText.style.top = '30%';
+		this.latText.style.left = '5%';
+		this.latText.style.transform = 'translate(0,-50%)'; // left anchor
+		this.domElement.appendChild(this.latText);
+
+		this.lonText = document.createElement('div');
+		this.lonText.style.fontSize = 'calc(0.5 * var(--grid-unit))';
+		this.lonText.style.top = '70%';
+		this.lonText.style.left = '5%';
+		this.lonText.style.transform = 'translate(0,-50%)'; // left anchor
+		this.domElement.appendChild(this.lonText);
+
+		this.aziText = document.createElement('div');
+		this.aziText.style.fontSize = 'calc(1.0 * var(--grid-unit))';
+		this.aziText.style.top = '50%';
+		this.aziText.style.left = '69%';
+		this.domElement.appendChild(this.aziText);
+
+		this.setPos();
+		this.tick();
+	}
+	tick () {
+		this.latText.innerHTML = 'lat' + latlonStr(weatherStub.lat);
+		this.lonText.innerHTML = 'lon' + latlonStr(weatherStub.lon);
+		this.aziText.innerHTML = Math.round(gameLocStub.azi) + '°';
 		
 		this.bubble.tick();
 	}
