@@ -28,24 +28,6 @@ const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct
 const gameLocStub = {
 	azi : 150.2
 };
-const weatherStub = {
-	location : 'Los Angeles',
-	lat : 34.067,
-	lon : -118.440,
-	condition : 'Mostly Cloudy',
-	temperature : {
-		c : 15.0,
-		f : 59
-	},
-	hi : {
-		c : 17.8,
-		f : 64
-	},
-	lo : {
-		c : 8.3,
-		f : 47
-	}
-};
 const audioStub = {
 	title : 'AHX Log 024',
 	paused : true,
@@ -60,6 +42,22 @@ let preferredUnits = {
 	time : '24',
 	temperature : 'f',
 	distance : 'm'
+};
+
+const TEMPERATURE_STR = {
+	'f' : 'F',
+	'c' : 'C',
+	'd' : '°',
+	'df' : '°F',
+	'dc' : '°C'
+};
+
+let preferrences = {
+	units : {
+		time : '24',
+		temperature : 'f',
+		distance : 'm'
+	}
 };
 
 /////////////////////
@@ -274,14 +272,8 @@ class BubbleWeather extends Bubble {
 		this.tick();
 	}
 	tick () {
-		const dummyUnits = {
-			f : '<sup>F</sup>',
-			c : '<sup>C</sup>',
-			deg : '°'
-		};
-		const c = Math.round( weatherStub.temperature[preferredUnits.temperature] );
-		const u = dummyUnits['deg'];
-		this.temperatureText.innerHTML = c + u;
+		const t = Math.round( (preferrences.units.temperature == 'f') ? weatherAccess.temperatureF : weatherAccess.temperature );
+		this.temperatureText.innerHTML = t + '°';
 	}
 }
 class BubbleHeartrate extends Bubble {
@@ -474,9 +466,11 @@ class TabWeather extends Tab {
 		this.tick();
 	}
 	tick () {
-		this.locText.innerHTML = weatherStub.location;
-		this.conditionText.innerHTML = weatherStub.condition;
-		this.hiloText.innerHTML = Math.round(weatherStub.hi[preferredUnits.temperature]) + '/' + Math.round(weatherStub.lo[preferredUnits.temperature]);
+		const hi = Math.round( (preferrences.units.temperature == 'f') ? weatherAccess.hiF : weatherAccess.hi );
+		const lo = Math.round( (preferrences.units.temperature == 'f') ? weatherAccess.loF : weatherAccess.lo );
+		this.locText.innerHTML = weatherAccess.location;
+		this.conditionText.innerHTML = weatherAccess.condition;
+		this.hiloText.innerHTML = hi + '/' + lo;
 		
 		this.bubble.tick();
 	}
@@ -566,8 +560,8 @@ class TabCompass extends Tab {
 		this.tick();
 	}
 	tick () {
-		this.latText.innerHTML = 'lat' + latlonStr(weatherStub.lat);
-		this.lonText.innerHTML = 'lon' + latlonStr(weatherStub.lon);
+		this.latText.innerHTML = 'lat' + latlonStr(weatherAccess.lat);
+		this.lonText.innerHTML = 'lon' + latlonStr(weatherAccess.lon);
 		this.aziText.innerHTML = Math.round(gameLocStub.azi) + '°';
 		
 		this.bubble.tick();
