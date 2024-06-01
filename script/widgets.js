@@ -74,6 +74,30 @@ function latlonStr (coord = 0) {
 	let c = coord.toFixed(3).padStart(7,'0');
 	return s + c;
 }
+function calendarMonthDates () {
+	let r = {
+		today : new Date(),
+		monthStart : new Date(),
+		monthEnd : new Date(),
+		firstWeekStart : new Date(),
+		lastWeekEnd : new Date()
+	};
+
+	// step back to first day of month
+	while (r.monthStart.getDate() > 1) r.monthStart.setDate(r.monthStart.getDate() - 1);
+	// step back to first Sunday on or before month start
+	r.firstWeekStart.setDate(r.monthStart.getDate());
+	while (r.firstWeekStart.getDay() > 0) r.firstWeekStart.setDate(r.firstWeekStart.getDate() - 1);
+	
+	// find end of month by stepping forward to first day of next month, then back one day
+	while (r.monthEnd.getDate() > 1) r.monthEnd.setDate(r.monthEnd.getDate() + 1);
+	r.monthEnd.setDate(r.monthEnd.getDate() - 1);
+	// step forward to first Saturday on or after month end
+	r.lastWeekEnd.setDate(r.monthEnd.getDate());
+	while (r.lastWeekEnd.getDay() < 6) r.lastWeekEnd.setDate(r.lastWeekEnd.getDate() + 1);
+
+	return r;
+}
 
 class WidgetController {
 	constructor (colors, gridUnit) {
@@ -604,6 +628,45 @@ class App {
 	}
 	updateSettings (settings={}) {}
 	tick () {}
+}
+
+class AppCalendar extends App {
+	constructor (x, y) {
+		super(x,y);
+
+		this.bubble = new BubbleCalendar();
+
+		this.dates = calendarMonthDates();
+		console.log(this.dates);
+		
+		// this.calendarFrame = document.createElement('div');
+		// this.calendarFrame.classList.add('');
+		// this.domElement.appendChild(this.calendarFrame);
+
+		this.setPos();
+		this.tick();
+	}
+	tick () {
+		
+
+		// for (let d = firstWeekStart; d < monthStart; d++) {}
+		// for (let d = monthStart; d < monthEnd; d++) {
+		// 	if (d == currDate) {
+		// 		// highlight
+		// 	}
+		// }
+		// for (let d = lastWeekStart; d < lastWeekEnd; d++) {}
+
+		// const d = new Date();
+		// const EEEE = DAYS_LONG[ d.getDay() ];
+		// const mm = (d.getMonth() + 1).toString().padStart(2,'0');
+		// const dd = d.getDate().toString().padStart(2,'0');
+		// const yyyy = d.getFullYear().toString();
+		// this.dayText.innerHTML = EEEE;
+		// this.dateText.innerHTML = mm + '/' + dd + '/' + yyyy;
+		
+		this.bubble.tick();
+	}
 }
 
 

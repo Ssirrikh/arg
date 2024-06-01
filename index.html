@@ -79,84 +79,6 @@ function getColorizer(targetColor) {
 }
 
 // clock builders
-function getCssClockHands(diameter, settings) {
-	let o = {};
-	let container = document.createElement('div');
-	container.style.background = 'transparent';
-	container.style.position = 'absolute';
-	container.style.display = 'inline-block';
-	container.style.borderRadius = '50%';
-	container.style.width = diameter;
-	container.style.height = diameter;
-	o.container = container;
-	let sec = document.createElement('div');
-	sec.style.background = settings.color;
-	sec.style.position = 'absolute';
-	sec.style.display = 'inline-block';
-	sec.style.height = '40%';
-	sec.style.width = 'calc(0.25% + 1px)';
-	sec.style.left = '50%';
-	sec.style.top = '50%';
-	sec.style.transformOrigin = 'bottom';
-	sec.style.transform = 'translate(-50%, -100%)';
-	o.sec = sec;
-	container.appendChild(sec);
-	let min = document.createElement('div');
-	min.style.background = settings.color;
-	min.style.position = 'absolute';
-	min.style.display = 'inline-block';
-	min.style.height = '40%';
-	min.style.width = 'calc(0.5% + 1.5px)';
-	min.style.left = '50%';
-	min.style.top = '50%';
-	min.style.transformOrigin = 'bottom';
-	min.style.transform = 'translate(-50%, -100%)';
-	o.min = min;
-	container.appendChild(min);
-	let hour = document.createElement('div');
-	hour.style.background = settings.color;
-	hour.style.position = 'absolute';
-	hour.style.display = 'inline-block';
-	hour.style.height = '30%';
-	hour.style.width = 'calc(0.75% + 1.75px)';
-	hour.style.left = '50%';
-	hour.style.top = '50%';
-	hour.style.transformOrigin = 'bottom';
-	hour.style.transform = 'translate(-50%, -100%)';
-	o.hour = hour;
-	container.appendChild(hour);
-	let cap = document.createElement('div');
-	cap.style.background = settings.color;
-	cap.style.position = 'absolute';
-	cap.style.display = 'inline-block';
-	cap.style.borderRadius = '50%';
-	cap.style.width = '4%';
-	cap.style.height = '4%';
-	cap.style.left = '50%';
-	cap.style.top = '50%';
-	cap.style.transform = 'translate(-50%, -50%)';
-	o.cap = cap;
-	container.appendChild(cap);
-	return o;
-}
-function getSvgClockFrame(radius = 50, strokeWidth = 0.5, color = '#000000') {
-	let svgStr = '';
-	const dTheta = 2*Math.PI / 60;
-	const innerR = 2.65/3*radius;
-	const outerR = 2.95/3*radius;
-	for (let i = 0; i < 60; i++) {
-		const radiusOffset = (i % 5 == 0) ? innerR : outerR;
-		const lineWidth = (i % 5 == 0) ? (1.5*strokeWidth) : (strokeWidth);
-		const x1 = radius + outerR * Math.cos(i*dTheta);
-		const y1 = radius + outerR * Math.sin(i*dTheta);
-		const x2 = radius + radiusOffset * Math.cos(i*dTheta);
-		const y2 = radius + radiusOffset * Math.sin(i*dTheta);
-		svgStr += '<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"';
-		svgStr += ' style = "stroke: ' + color + '; stroke-width: ' + lineWidth + '; stroke-linecap: round;"';
-		svgStr += ' />';
-	}
-	return svgStr;
-}
 const svgHeartPath = 'M 0 -4 C 0 -4 -3 -8 -6 -5 C -9 -2 -5 5 0 7 C 5 5 9 -2 6 -5 C 3 -8 0 -4 0 -4';
 function getSvgHeart (color='#ff0000') {
 	const w = getCSSVar('--grid-unit');
@@ -203,7 +125,7 @@ let row1 = [
 	new TabPlayer(...gridPos(11,1))
 ];
 let row2 = [
-	new App(...gridPos(5,2))
+	new AppCalendar(...gridPos(5,2))
 ];
 
 function init () {
