@@ -29,6 +29,7 @@ Date.prototype.dstObserved = function () { return this.getTimezoneOffset() < thi
 // helpers
 function isEven (n) {return n % 2 == 0; }
 function randInt (min,max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function intervalRandInt (avg,variance) { return randInt(avg-variance, avg+variance); }
 function randomizeArray (a) {
 	let temp = [];
 	while (a.length > 0) temp.push(a.splice( randInt(0,a.length-1), 1)[0]);
@@ -98,12 +99,125 @@ function getSvgHeart (color='#ff0000') {
 
 /////////////////////////////////
 
+function playSound (player, filename) {
+	player.pause();
+	player.src = 'source/' + filename;
+	player.play();
+}
+
+
+const DEFAULT_SETTINGS_BOOTFLICKER = {
+	avg: 5, // avg num of on/off cycles
+	var: 0, // variance of number of clickers (random amount on [avg-var, avg+var])
+	initGap: 40, // successive increase in delay between initial flickers of multiple elements, in ms (0 is sync'd, higher val creates wave effect)
+	initDelayMax: 40, // max extra delay before first flicker begins, in ms
+	interval: 80, // delay between on/off in one cycle, in ms
+
+	flickerDim: '0.3' // opacity during flicker "off" state (higher opacity makes flicker seem gentler, 0.8 and up looks like pulsing instead)
+};
+
+function bootflicker (flickerGroups, settings) {
+	let numFlickers = [];
+	for (let i = 0; i < flickerGroups.length; i++) {
+		// random amount and speed of flickers
+		const initTime = i*(settings.initGap) + randInt(0,settings.initDelayMax);
+		numFlickers.push(2*intervalRandInt(settings.avg,settings.var));
+		// all elems off at init
+		for (const e of flickerGroups[i]) e.style.opacity = '0.0';
+		// set up flicker interval for each element
+		window.setTimeout(function() {
+			const elementId = i; // freeze i to scope for timer's lambda to reference
+			let timer; // declare timer at higher scope so lambda can clear its own timer
+			timer = setInterval(function() {
+				numFlickers[elementId]--;
+				for (const e of flickerGroups[elementId]) e.style.opacity = isEven(numFlickers[elementId]) ? '1.0' : settings.flickerDim;
+				if (numFlickers[elementId] < 1) clearInterval(timer);
+			},settings.interval);
+		},initTime);
+	}
+}
+
+// let flickerSettings = {
+// 	count: 5,
+// 	countVariance: 0,
+// 	interval: 60,
+// 	startVariance: 40
+// };
+// let flickerGroups = [];
+// function bootFlicker(settings) {
+	// let flickerCounts = [];
+	// for (let i = 0, n = flickerGroups.length; i < n; i++) {
+	// 	// prep elements
+	// 	flickerCounts.push(2*randInt(settings.count-settings.countVariance, settings.count+settings.countVariance));
+	// 	for (elem of flickerGroups[i]) {
+	// 		// elem.style.visibility = 'hidden';
+	// 		elem.style.opacity = '0.0';
+	// 	}
+	// 	// set up flicker timers
+	// 	let waitTime = randInt(0, settings.startVariance) + 40*i;
+	// 	window.setTimeout(function() {
+	// 		let timer, thisI = i, thisInt = settings.interval;
+	// 		timer = setInterval(function() {
+	// 			flickerCounts[thisI]--;
+	// 			if (flickerCounts[thisI] < 1) {
+	// 				// delete self when done
+	// 				clearInterval(timer);
+	// 				return;
+	// 			}
+	// 			for (elem of flickerGroups[thisI]) {
+	// 				// elem.style.visibility = (isEven(flickerCounts[thisI])) ? 'hidden' : 'visible';
+// 					elem.style.opacity = (isEven(flickerCounts[thisI])) ? '0.2' : '1.0';
+// 				}
+// 			}, thisInt);
+// 		}, waitTime);
+// 	}
+// }
+
+
+
+
+const kp = document.createElement('audio');
+const k = [38,38,40,40,37,39,37,39,66,65,13];
+let ki = 0;
+
+window.addEventListener('keydown', e => {
+	ki = (e.keyCode === k[ki]) ? (ki+1) : 0;
+	if (ki === k.length) {
+		// playSound(kp, 'menu-open');
+		console.log('Terminal sublayer enabled.');
+	} else if (ki > 0) {
+		// playSound(kp, 'menu-tick');
+		console.log(ki);
+	}
+
+	// if (e.key == 'c') {
+	// 	DEFAULT_SETTINGS_BOOTFLICKER.flickerDim = (DEFAULT_SETTINGS_BOOTFLICKER.flickerDim == '0.5') ? '0.2' : '0.5';
+	// }
+
+	if (e.key == '`') {
+		console.log('dev action');
+		bootflicker(
+			[
+				...domElementsOfGroup(row2),
+				...domElementsOfGroup(row1),
+				...domElementsOfGroup(row0)
+			],
+			DEFAULT_SETTINGS_BOOTFLICKER
+		);
+	}
+})
+
+/////////////////////////////////
+
 const CSS_ROOT = document.querySelector(':root');
 const getCSSVar = p => getComputedStyle(CSS_ROOT).getPropertyValue(p);
 const setCSSVar = (p,v) => CSS_ROOT.style.setProperty(p,v);
 
 const GRID_UNIT = parseFloat(getCSSVar('--grid-unit'));
 const gridPos = (x,y) => [(2*GRID_UNIT + 3*x*GRID_UNIT)+'vw', (2*GRID_UNIT + 3*y*GRID_UNIT)+'vw'];
+
+const domElementsOf = (widget) => (widget.bubble) ? [widget.domElement,widget.bubble.domElement] : [widget.domElement];
+const domElementsOfGroup = (group) => group.map(widget => (widget.bubble) ? [widget.domElement,widget.bubble.domElement] : [widget.domElement]);
 
 let row0 = [
 	new BubbleClockDigital(...gridPos(0,0)),
@@ -138,6 +252,20 @@ function init () {
 	for (let widget of row2) {
 		widget.attach(document.body);
 	}
+
+	
+	bootflicker(
+		[
+			// [row2[0].domElement, row2[0].bubble.domElement],
+			// [row1[0].domElement]
+			// domElementsOf(row2[0]),
+			// domElementsOf(row1[0]),
+			...domElementsOfGroup(row2),
+			...domElementsOfGroup(row1),
+			...domElementsOfGroup(row0)
+		],
+		DEFAULT_SETTINGS_BOOTFLICKER
+	);
 }
 init();
 
